@@ -1,0 +1,285 @@
+openapi: 3.1.0
+info:
+  title: Bancada Componentes
+  description: Inventário e empréstimo de componentes eletrônicos de bancada.
+  version: 0.1.0
+paths:
+  /componentes:
+    get:
+      summary: Listar Componentes
+      operationId: listar_componentes_componentes_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ComponenteSaida'
+                type: array
+                title: Response Listar Componentes Componentes Get
+    post:
+      summary: Criar Componente
+      operationId: criar_componente_componentes_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponenteCriar'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponenteSaida'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /emprestimos:
+    post:
+      summary: Criar Emprestimo
+      operationId: criar_emprestimo_emprestimos_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmprestimoCriar'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmprestimoSaida'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: Listar Emprestimos
+      operationId: listar_emprestimos_emprestimos_get
+      parameters:
+      - name: responsavel
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Responsavel
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmprestimoSaida'
+                title: Response Listar Emprestimos Emprestimos Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /emprestimos/{emprestimo_id}/devolucao:
+    post:
+      summary: Devolver Emprestimo
+      operationId: devolver_emprestimo_emprestimos__emprestimo_id__devolucao_post
+      parameters:
+      - name: emprestimo_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Emprestimo Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmprestimoSaida'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /health:
+    get:
+      summary: Health
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Health Health Get
+components:
+  schemas:
+    ComponenteCriar:
+      properties:
+        nome:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Nome
+        categoria:
+          type: string
+          maxLength: 60
+          minLength: 1
+          title: Categoria
+        quantidade_total:
+          type: integer
+          minimum: 0.0
+          title: Quantidade Total
+      type: object
+      required:
+      - nome
+      - categoria
+      - quantidade_total
+      title: ComponenteCriar
+    ComponenteSaida:
+      properties:
+        id:
+          type: integer
+          title: Id
+        nome:
+          type: string
+          title: Nome
+        categoria:
+          type: string
+          title: Categoria
+        quantidade_total:
+          type: integer
+          title: Quantidade Total
+        quantidade_disponivel:
+          type: integer
+          title: Quantidade Disponivel
+      type: object
+      required:
+      - id
+      - nome
+      - categoria
+      - quantidade_total
+      - quantidade_disponivel
+      title: ComponenteSaida
+    EmprestimoCriar:
+      properties:
+        componente_id:
+          type: integer
+          title: Componente Id
+        responsavel:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Responsavel
+        quantidade:
+          type: integer
+          title: Quantidade
+      type: object
+      required:
+      - componente_id
+      - responsavel
+      - quantidade
+      title: EmprestimoCriar
+    EmprestimoSaida:
+      properties:
+        id:
+          type: integer
+          title: Id
+        componente_id:
+          type: integer
+          title: Componente Id
+        responsavel:
+          type: string
+          title: Responsavel
+        quantidade:
+          type: integer
+          title: Quantidade
+        data_emprestimo:
+          type: string
+          format: date
+          title: Data Emprestimo
+        data_prevista_devolucao:
+          type: string
+          format: date
+          title: Data Prevista Devolucao
+        status:
+          $ref: '#/components/schemas/StatusEmprestimo'
+        data_devolucao:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Data Devolucao
+        dias_atraso:
+          type: integer
+          title: Dias Atraso
+      type: object
+      required:
+      - id
+      - componente_id
+      - responsavel
+      - quantidade
+      - data_emprestimo
+      - data_prevista_devolucao
+      - status
+      - data_devolucao
+      - dias_atraso
+      title: EmprestimoSaida
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    StatusEmprestimo:
+      type: string
+      enum:
+      - ABERTO
+      - DEVOLVIDO
+      title: StatusEmprestimo
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
