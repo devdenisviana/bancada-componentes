@@ -16,3 +16,8 @@ class LimiteExcedido(ErroDeDominio):
 
 class EmprestimoJaDevolvido(ErroDeDominio):
     """O empréstimo já foi devolvido e não pode ser devolvido de novo."""
+    
+    
+
+class RecursoNaoEncontrado(ErroDeDominio):
+    """O componente ou o empréstimo solicitado não existe."""
