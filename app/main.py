@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from app.api.rotas import router
 from app.database import Base, engine
@@ -13,6 +14,7 @@ from app.domain.excecoes import (
     QuantidadeInvalida,
     RecursoNaoEncontrado,
 )
+from app.observabilidade import configurar_logs, registrar_requisicao
 from app.repositories import models  # noqa: F401  (registra as tabelas)
 
 STATUS_POR_ERRO = {
@@ -22,6 +24,8 @@ STATUS_POR_ERRO = {
     LimiteExcedido: 409,
     EmprestimoJaDevolvido: 409,
 }
+
+configurar_logs()
 
 
 @asynccontextmanager
@@ -37,6 +41,8 @@ app = FastAPI(
     lifespan=ciclo_de_vida,
 )
 
+app.middleware("http")(registrar_requisicao)
+
 
 @app.exception_handler(ErroDeDominio)
 async def tratar_erro_de_dominio(request: Request, erro: ErroDeDominio):
@@ -50,3 +56,8 @@ app.include_router(router)
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/metrics", include_in_schema=False)
+def metricas() -> Response:
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
