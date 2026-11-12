@@ -115,3 +115,15 @@ docs/            documentação
 
 Projeto individual de Denis Viana (@devdenisviana). Veja
 [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
+
+## Demonstração online
+
+A API está publicada no Render (plano gratuito):
+
+- Documentação interativa (Swagger UI): https://bancada-componentes.onrender.com/docs
+- Verificação de saúde: https://bancada-componentes.onrender.com/health
+
+Observações do plano gratuito:
+
+- Após cerca de 15 minutos sem acesso, o serviço "dorme". A primeira requisição seguinte pode levar cerca de 1 minuto para responder.
+- O disco é temporário: o banco SQLite volta vazio a cada reinício ou novo deploy. É uma demonstração, não um ambiente de produção.
